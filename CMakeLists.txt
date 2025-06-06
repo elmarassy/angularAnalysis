@@ -19,7 +19,10 @@ FetchContent_MakeAvailable(pybind11)
 
 add_executable(cern src/main.cpp
         include/fit.h
-        src/fit.cpp)
+        include/timeDependentFit.h
+        src/fit.cpp
+        src/timeDependentFit.cpp
+        include/timeDependentFit.h)
 
 # Link ROOT libraries to your executable
 target_link_libraries(cern ${ROOT_LIBRARIES})
