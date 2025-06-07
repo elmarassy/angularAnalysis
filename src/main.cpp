@@ -21,7 +21,7 @@
 #include "TError.h"
 
 #include "../include/fit.h"
-
+#include "../include/timeDependentFit.h"
 using namespace RooFit;
 
 
@@ -91,26 +91,26 @@ void runTimeIndependent() {
     auto t_after_toystudy = std::chrono::high_resolution_clock::now();
 
     const RooArgSet* fitParams = mcstudy->fitParams(0);
-
-    TIterator* iter = fitParams->createIterator();
-    RooRealVar* var = nullptr;
-
-    while ((var = (RooRealVar*)iter->Next())) {
-        const char* name = var->GetName();
-        try {
-            RooPlot* pullFrame = mcstudy->plotPull(*var, -4, 4);
-            if (!pullFrame || pullFrame->numItems() == 0) {
-                continue;
-            }
-            TCanvas* pullCanvas = new TCanvas(Form("c_%s", name), Form("Pull of %s", name), 1600, 1200);
-            pullFrame->Draw();
-            pullCanvas->SaveAs(Form("pulls2/%s.png", name));
-            delete pullCanvas;
-        } catch (const std::exception& e) {
-            continue;
-        }
-    }
-    delete iter;
+    //
+    // TIterator* iter = fitParams->createIterator();
+    // RooRealVar* var = nullptr;
+    //
+    // while ((var = (RooRealVar*)iter->Next())) {
+    //     const char* name = var->GetName();
+    //     try {
+    //         RooPlot* pullFrame = mcstudy->plotPull(*var, -4, 4);
+    //         if (!pullFrame || pullFrame->numItems() == 0) {
+    //             continue;
+    //         }
+    //         TCanvas* pullCanvas = new TCanvas(Form("c_%s", name), Form("Pull of %s", name), 1600, 1200);
+    //         pullFrame->Draw();
+    //         pullCanvas->SaveAs(Form("pulls2/%s.png", name));
+    //         delete pullCanvas;
+    //     } catch (const std::exception& e) {
+    //         continue;
+    //     }
+    // }
+    // delete iter;
 
 
     RooPlot* fitFrame = costhetal.frame(100);
@@ -210,9 +210,9 @@ void runTimeDependentUntagged() {
     auto t_before_toystudy = std::chrono::high_resolution_clock::now();
 
     unsigned int ngen = 10000;
-    unsigned int nruns = 1000;
+    unsigned int nruns = 10;
     RooMCStudy *mcstudy =
-            new RooMCStudy(model, RooArgSet(costhetal, costhetak, phi, t),Binned(false), FitOptions(Strategy(2),Hesse(true), Save(true),PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(10)));
+            new RooMCStudy(model, RooArgSet(costhetal, costhetak, phi, t),Binned(false), FitOptions(Strategy(2),Hesse(true), Save(true),PrintEvalErrors(0), EvalBackend("cuda"), NumCPU(16)));
 
     mcstudy->generateAndFit(nruns, ngen, true);
 
@@ -220,25 +220,25 @@ void runTimeDependentUntagged() {
 
     const RooArgSet* fitParams = mcstudy->fitParams(0);
 
-    TIterator* iter = fitParams->createIterator();
-    RooRealVar* var = nullptr;
-
-    while ((var = (RooRealVar*)iter->Next())) {
-        const char* name = var->GetName();
-        try {
-            RooPlot* pullFrame = mcstudy->plotPull(*var, -4, 4);
-            if (!pullFrame || pullFrame->numItems() == 0) {
-                continue;
-            }
-            TCanvas* pullCanvas = new TCanvas(Form("c_%s", name), Form("Pull of %s", name), 1600, 1200);
-            pullFrame->Draw();
-            pullCanvas->SaveAs(Form("pulls2/%s.png", name));
-            delete pullCanvas;
-        } catch (const std::exception& e) {
-            continue;
-        }
-    }
-    delete iter;
+    // TIterator* iter = fitParams->createIterator();
+    // RooRealVar* var = nullptr;
+    //
+    // while ((var = (RooRealVar*)iter->Next())) {
+    //     const char* name = var->GetName();
+    //     try {
+    //         RooPlot* pullFrame = mcstudy->plotPull(*var, -4, 4);
+    //         if (!pullFrame || pullFrame->numItems() == 0) {
+    //             continue;
+    //         }
+    //         TCanvas* pullCanvas = new TCanvas(Form("c_%s", name), Form("Pull of %s", name), 1600, 1200);
+    //         pullFrame->Draw();
+    //         pullCanvas->SaveAs(Form("pulls2/%s.png", name));
+    //         delete pullCanvas;
+    //     } catch (const std::exception& e) {
+    //         continue;
+    //     }
+    // }
+    // delete iter;
 
 
     RooPlot* fitFrame = costhetal.frame(100);
@@ -351,7 +351,7 @@ void runTimeDependentTagged() {
     unsigned int ngen = 10000;
     unsigned int nruns = 1000;
     RooMCStudy *mcstudy =
-            new RooMCStudy(model, RooArgSet(costhetal, costhetak, phi, t),Binned(false), FitOptions(Strategy(2),Hesse(true), Save(true),PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(10)));
+            new RooMCStudy(model, RooArgSet(costhetal, costhetak, phi, t),Binned(false), FitOptions(Strategy(2),Hesse(true), Save(true),PrintEvalErrors(0), EvalBackend("cuda "), NumCPU(10)));
 
     mcstudy->generateAndFit(nruns, ngen, true);
 
@@ -359,25 +359,25 @@ void runTimeDependentTagged() {
 
     const RooArgSet* fitParams = mcstudy->fitParams(0);
 
-    TIterator* iter = fitParams->createIterator();
-    RooRealVar* var = nullptr;
-
-    while ((var = (RooRealVar*)iter->Next())) {
-        const char* name = var->GetName();
-        try {
-            RooPlot* pullFrame = mcstudy->plotPull(*var, -4, 4);
-            if (!pullFrame || pullFrame->numItems() == 0) {
-                continue;
-            }
-            TCanvas* pullCanvas = new TCanvas(Form("c_%s", name), Form("Pull of %s", name), 1600, 1200);
-            pullFrame->Draw();
-            pullCanvas->SaveAs(Form("pulls3/%s.png", name));
-            delete pullCanvas;
-        } catch (const std::exception& e) {
-            continue;
-        }
-    }
-    delete iter;
+    // TIterator* iter = fitParams->createIterator();
+    // RooRealVar* var = nullptr;
+    //
+    // while ((var = (RooRealVar*)iter->Next())) {
+    //     const char* name = var->GetName();
+    //     try {
+    //         RooPlot* pullFrame = mcstudy->plotPull(*var, -4, 4);
+    //         if (!pullFrame || pullFrame->numItems() == 0) {
+    //             continue;
+    //         }
+    //         TCanvas* pullCanvas = new TCanvas(Form("c_%s", name), Form("Pull of %s", name), 1600, 1200);
+    //         pullFrame->Draw();
+    //         pullCanvas->SaveAs(Form("pulls3/%s.png", name));
+    //         delete pullCanvas;
+    //     } catch (const std::exception& e) {
+    //         continue;
+    //     }
+    // }
+    // delete iter;
 
 
     RooPlot* fitFrame = costhetal.frame(100);
@@ -433,7 +433,7 @@ int main() {
 //    RooMsgService::instance().setStreamStatus(0, false);
 //    RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL );
 
-    runTimeDependentTagged();
-
+    // runTimeDependentUntagged();
+    fitTimeDependent(1, 10000);
     return 0;
 }
