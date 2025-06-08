@@ -566,8 +566,8 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar x("x", "x", 26.93);
     RooRealVar y("y", "y", 0.124);
 
-    RooRealVar J1s("J1s", "J1s", 0.7, 0, 1);
-    RooRealVar J1c("J1c", "J1c", 0.4, -1, 1);
+    RooRealVar J1s("J1s", "J1s", 7, 0, 10);
+    RooRealVar J1c("J1c", "J1c", 4, 0, 10);
     RooRealVar J2s("J2s", "J2s", 0, -1, 1);
     RooRealVar J2c("J2c", "J2c", 0, -1, 1);
     RooRealVar J3("J3", "J3", 0, -1, 1);
@@ -578,8 +578,8 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar J8("J8", "J8", 0, -1, 1);
     RooRealVar J9("J9", "J9", 0, -1, 1);
 
-    RooRealVar J1sBar("J1sBar", "J1sBar", 0.7, 0, 1);
-    RooRealVar J1cBar("J1cBar", "J1cBar", 0.4, -1, 1);
+    RooRealVar J1sBar("J1sBar", "J1sBar", 7, 0, 10);
+    RooRealVar J1cBar("J1cBar", "J1cBar", 4, 0, 10);
     RooRealVar J2sBar("J2sBar", "J2sBar", 0, -1, 1);
     RooRealVar J2cBar("J2cBar", "J2cBar", 0, -1, 1);
     RooRealVar J3Bar("J3Bar", "J3Bar", 0, -1, 1);
@@ -653,7 +653,7 @@ void fitTimeDependent(int nruns, int ngen) {
 
     std::unique_ptr<RooDataSet> bData{b.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), ngen)};
     std::unique_ptr<RooDataSet> bBarData{bBar.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), 0)};
-    RooFitResult* result = b.fitTo(*bData, Save(), FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(16)));
+    RooFitResult* result = b.fitTo(*bData, Save(), EvalBackend("cuda"), Strategy(2), Hesse(true));//FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("cuda"), NumCPU(16)));
     //
     // RooDataSet combData("combData", "combined data", RooArgSet(cosThetaL, cosThetaK, phi, t), Index(type),
     //     Import({{"B0", bData.get()}, {"B0Bar", bBarData.get()}}));
