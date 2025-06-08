@@ -127,16 +127,6 @@ public:
                      (3*J1c - 3*J1cBar + 6*J1s - 6*J1sBar - J2c + J2cBar - 2*J2s + 2*J2sBar - 3*s1c*x - 6*s1s*x + s2c*x + 2*s2s*x)*y*y);
 
 
-
-
-//             double factor = 1/((1+x*x)*(1-y*y));
-//             double term1 = 12*J1s - 2*J2c - 4*J2s - (3*s1c + 6*s1s - s2c - 2*s2s)*x;
-//             double term2 = (3*J1cBar + 6*J1s + 6*J1sBar - J2c - J2cBar - 2*(J2s + J2sBar)) * x*x;
-//             double term3 = (3*J1cBar - 6*J1s + 6*J1sBar + J2c - J2cBar + 2*J2s - 2*J2sBar +(3*s1c + 6*s1s - s2c - 2*s2s)*x)*y*y;
-//             double term4 = 3 * J1c * (2 + x*x - y*y);
-//             double term5 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (y*y-1);
-//             return (factor*(term1 + term2 + term3 + term4) + term5)/8;
-
          }
          return 0 ;
      }
@@ -244,11 +234,14 @@ public:
             double s2s = s2s_;
             double s2c = s2c_;
 
-            return 1/(8*(1 + x*x)*(-1 + y*y)) * (
-                    -6*J1c - 12*J1s + 2*J2c + 4*J2s + 3*s1c*x + 6*s1s*x - s2c*x - 2*s2s*x +
-                    (-3*J1c - 3*J1cBar - 6*J1s - 6*J1sBar + J2c + J2cBar + 2*(J2s + J2sBar))*x*x +
-                    (3*h1c + 6*h1s - h2c - 2*h2s)*(1 + x*x)*y +
-                    (3*J1c - 3*J1cBar + 6*J1s - 6*J1sBar - J2c + J2cBar - 2*J2s + 2*J2sBar - 3*s1c*x - 6*s1s*x + s2c*x + 2*s2s*x)*y*y);
+
+            return (1/(8*(1 + x*x) * (-1 + y*y))) * (
+                    2*J2cBar + 4*J2sBar - 3*s1c*x - 6*s1s*x + s2c*x + 2*s2s*x - 3*J1c*x*x - 6*J1s*x*x + J2c*x*x + J2cBar*x*x +
+                     2*J2s*x*x + 2*J2sBar*x*x + 3*h1c*y + 6*h1s*y - h2c*y - 2*h2s*y +
+                3*h1c*x*x*y + 6*h1s*x*x*y - h2c*x*x*y - 2*h2s*x*x*y - 3*J1c*y*y -
+              6*J1s*y*y + J2c*y*y - J2cBar*y*y + 2*J2s*y*y - 2*J2sBar*y*y +
+                3*s1c*x*y*y + 6*s1s*x*y*y - s2c*x*y*y - 2*s2s*x*y*y -
+              3*J1cBar*(2 + x*x - y*y) - 6*J1sBar*(2 + x*x - y*y));
 
         }
         return 0 ;
