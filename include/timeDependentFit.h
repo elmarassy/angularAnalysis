@@ -94,53 +94,62 @@ public:
 
     inline void doEval(RooFit::EvalContext &ctx) const override;
 
-    // int getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char */*rangeName*/) const override {
-    //     if (matchArgs(allVars, analVars, cosThetaL_, cosThetaK_, phi_, t_)) return 1 ;
-    //     return 0 ;
-    // }
-    //
-    // double analyticalIntegral(int code, const char *rangeName) const override {
-    //     if (code==1) {
-    //         double x = x_;
-    //         double y = y_;
-    //         double J1s = J1s_;
-    //         double J1c = J1c_;
-    //         double J2s = J2s_;
-    //         double J2c = J2c_;
-    //         double J1sBar = J1sBar_;
-    //         double J1cBar = J1cBar_;
-    //         double J2sBar = J2sBar_;
-    //         double J2cBar = J2cBar_;
-    //         double h1s = h1s_;
-    //         double h1c = h1c_;
-    //         double h2s = h2s_;
-    //         double h2c = h2c_;
-    //         double s1s = s1s_;
-    //         double s1c = s1c_;
-    //         double s2s = s2s_;
-    //         double s2c = s2c_;
-    //
-    //         double factor = 1/((1+x*x)*(1-y*y));
-    //         double term1 = 12*J1s - 2*J2c - 4*J2s - (3*s1c + 6*s1s - s2c - 2*s2s)*x;
-    //         double term2 = (3*J1cBar + 6*J1s + 6*J1sBar - J2c - J2cBar - 2*(J2s + J2sBar)) * x*x;
-    //         double term3 = (3*J1cBar - 6*J1s + 6*J1sBar + J2c - J2cBar + 2*J2s - 2*J2sBar +(3*s1c + 6*s1s - s2c - 2*s2s)*x)*y*y;
-    //         double term4 = 3 * J1c * (2 + x*x - y*y);
-    //         double term5 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (y*y-1);
-    //         return (factor*(term1 + term2 + term3 + term4) + term5)/8;
-    //
-    //
-    //
-    //
-    //
-    //         // double c = -3*J1c - 3*J1cBar - 6*J1s - 6*J1sBar + J2c +J2cBar + 2 * (J2s + J2sBar);
-    //         // double term1 = (6*J1c - 6*J1cBar + 12*J1s - 12*J1sBar - 2*J2c + 2*J2cBar - 4*J2s + 4*J2sBar + x * (-3*s1c - 6*s1s + s2c + 2*s2s)) / (1 + pow(x, 2));
-    //         // double term2 = c / (y - 1);
-    //         // double term3 = c / (-y - 1);
-    //         // double term4 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (-1 + y*y);
-    //         // return (term1 + term2 + term3 + term4) / 16;
-    //     }
-    //     return 0 ;
-    // }
+     int getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char */*rangeName*/) const override {
+         if (matchArgs(allVars, analVars, cosThetaL_, cosThetaK_, phi_, t_)) return 1 ;
+         return 0 ;
+     }
+
+     double analyticalIntegral(int code, const char *rangeName) const override {
+         if (code==1) {
+             double x = x_;
+             double y = y_;
+             double J1s = J1s_;
+             double J1c = J1c_;
+             double J2s = J2s_;
+             double J2c = J2c_;
+             double J1sBar = J1sBar_;
+             double J1cBar = J1cBar_;
+             double J2sBar = J2sBar_;
+             double J2cBar = J2cBar_;
+             double h1s = h1s_;
+             double h1c = h1c_;
+             double h2s = h2s_;
+             double h2c = h2c_;
+             double s1s = s1s_;
+             double s1c = s1c_;
+             double s2s = s2s_;
+             double s2c = s2c_;
+
+             return 1/(8*(1 + x*x)*(-1 + y*y)) * (
+                     -6*J1c - 12*J1s + 2*J2c + 4*J2s + 3*s1c*x + 6*s1s*x - s2c*x - 2*s2s*x +
+                     (-3*J1c - 3*J1cBar - 6*J1s - 6*J1sBar + J2c + J2cBar + 2*(J2s + J2sBar))*x*x +
+                     (3*h1c + 6*h1s - h2c - 2*h2s)*(1 + x*x)*y +
+                     (3*J1c - 3*J1cBar + 6*J1s - 6*J1sBar - J2c + J2cBar - 2*J2s + 2*J2sBar - 3*s1c*x - 6*s1s*x + s2c*x + 2*s2s*x)*y*y);
+
+
+
+
+//             double factor = 1/((1+x*x)*(1-y*y));
+//             double term1 = 12*J1s - 2*J2c - 4*J2s - (3*s1c + 6*s1s - s2c - 2*s2s)*x;
+//             double term2 = (3*J1cBar + 6*J1s + 6*J1sBar - J2c - J2cBar - 2*(J2s + J2sBar)) * x*x;
+//             double term3 = (3*J1cBar - 6*J1s + 6*J1sBar + J2c - J2cBar + 2*J2s - 2*J2sBar +(3*s1c + 6*s1s - s2c - 2*s2s)*x)*y*y;
+//             double term4 = 3 * J1c * (2 + x*x - y*y);
+//             double term5 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (y*y-1);
+//             return (factor*(term1 + term2 + term3 + term4) + term5)/8;
+
+
+
+
+
+             // double c = -3*J1c - 3*J1cBar - 6*J1s - 6*J1sBar + J2c +J2cBar + 2 * (J2s + J2sBar);
+             // double term1 = (6*J1c - 6*J1cBar + 12*J1s - 12*J1sBar - 2*J2c + 2*J2cBar - 4*J2s + 4*J2sBar + x * (-3*s1c - 6*s1s + s2c + 2*s2s)) / (1 + pow(x, 2));
+             // double term2 = c / (y - 1);
+             // double term3 = c / (-y - 1);
+             // double term4 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (-1 + y*y);
+             // return (term1 + term2 + term3 + term4) / 16;
+         }
+         return 0 ;
+     }
 };
 
 class timeDependentBBar: public RooAbsPdf {
