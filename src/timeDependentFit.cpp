@@ -6,14 +6,19 @@
 #include <RooSimultaneous.h>
 #include <RooMCStudy.h>
 #include "../include/timeDependentFit.h"
-
+#include "TCanvas.h"
+#include "TH1D.h"
+#include "TROOT.h"
+#include "TMath.h"
+#include "TStyle.h"
 #include <RooFitResult.h>
+#include <RooPlot.h>
 
 using namespace RooFit;
 
 timeDependentB::timeDependentB(const char *name, const char *title, RooAbsReal &costhetal, RooAbsReal &costhetak,
-                               RooAbsReal& t,
-                               RooAbsReal &phi, RooAbsReal &x, RooAbsReal &y, RooAbsReal &J1s, RooAbsReal &J1c,
+                               RooAbsReal& phi,
+                               RooAbsReal &t, RooAbsReal &x, RooAbsReal &y, RooAbsReal &J1s, RooAbsReal &J1c,
                                RooAbsReal &J2s, RooAbsReal &J2c, RooAbsReal &J3, RooAbsReal &J4, RooAbsReal &J5,
                                RooAbsReal &J6s, RooAbsReal &J7, RooAbsReal &J8, RooAbsReal &J9, RooAbsReal &J1sBar, RooAbsReal &J1cBar,
                                RooAbsReal &J2sBar, RooAbsReal &J2cBar, RooAbsReal &J3Bar, RooAbsReal &J4Bar, RooAbsReal &J5Bar,
@@ -156,7 +161,6 @@ inline double timeDependentB::evaluate_prob(double cosThetaL, double cosThetaK, 
     auto helper = [=](double Ji, double JiBar, double si, double hi) {
         return (Ji + JiBar) * cosh_yt + (Ji-JiBar) * cos_xt - (hi * sinh_yt + si * sin_xt);
     };
-
     return 0.5 * c * decay * (
             helper(J1s, J1sBar, s1s, h1s) * sinThetaK2 +
             helper(J1c, J1cBar, s1c, h1c) * cosThetaK2 +
@@ -507,7 +511,7 @@ void timeDependentBBar::doEval(RooFit::EvalContext &ctx) const {
     std::span<const double> s8Span = ctx.at(s8_);
     std::span<const double> s9Span = ctx.at(s9_);
     std::size_t n = ctx.output().size();
-    for (std::size_t i = 0; i < n; ++i) {
+     for (std::size_t i = 0; i < n; ++i) {
         ctx.output()[i] = evaluate_prob(cosThetaLSpan.size() > 1 ? cosThetaLSpan[i] : cosThetaLSpan[0],
                                         cosThetaKSpan.size() > 1 ? cosThetaKSpan[i] : cosThetaKSpan[0],
                                         phiSpan.size() > 1 ? phiSpan[i] : phiSpan[0],
@@ -566,53 +570,53 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar x("x", "x", 26.93);
     RooRealVar y("y", "y", 0.124);
 
-    RooRealVar J1s("J1s", "J1s", 7, 0, 10);
-    RooRealVar J1c("J1c", "J1c", 4, 0, 10);
-    RooRealVar J2s("J2s", "J2s", 0, -1, 1);
-    RooRealVar J2c("J2c", "J2c", 0, -1, 1);
-    RooRealVar J3("J3", "J3", 0, -1, 1);
-    RooRealVar J4("J4", "J4", 0, -1, 1);
-    RooRealVar J5("J5", "J5", 0, -1, 1);
-    RooRealVar J6s("J6s", "J6s", 0, -1, 1);
-    RooRealVar J7("J7", "J7", 0, -1, 1);
-    RooRealVar J8("J8", "J8", 0, -1, 1);
-    RooRealVar J9("J9", "J9", 0, -1, 1);
+    RooRealVar J1s("J1s", "J1s", 7);
+    RooRealVar J1c("J1c", "J1c", 4, -10, 10);
+    RooRealVar J2s("J2s", "J2s", 3, -10, 10);
+    RooRealVar J2c("J2c", "J2c", 2, -10, 10);
+    RooRealVar J3("J3", "J3", 0, -10, 10);
+    RooRealVar J4("J4", "J4", 0, -10, 10);
+    RooRealVar J5("J5", "J5", 0, -10, 10);
+    RooRealVar J6s("J6s", "J6s", 0, -10, 10);
+    RooRealVar J7("J7", "J7", 0, -10, 10);
+    RooRealVar J8("J8", "J8", 0, -10, 10);
+    RooRealVar J9("J9", "J9", 0, -10, 10);
 
-    RooRealVar J1sBar("J1sBar", "J1sBar", 7, 0, 10);
-    RooRealVar J1cBar("J1cBar", "J1cBar", 4, 0, 10);
-    RooRealVar J2sBar("J2sBar", "J2sBar", 0, -1, 1);
-    RooRealVar J2cBar("J2cBar", "J2cBar", 0, -1, 1);
-    RooRealVar J3Bar("J3Bar", "J3Bar", 0, -1, 1);
-    RooRealVar J4Bar("J4Bar", "J4Bar", 0, -1, 1);
-    RooRealVar J5Bar("J5Bar", "J5Bar", 0, -1, 1);
-    RooRealVar J6sBar("J6sBar", "J6sBar", 0, -1, 1);
-    RooRealVar J7Bar("J7Bar", "J7Bar", 0, -1, 1);
-    RooRealVar J8Bar("J8Bar", "J8Bar", 0, -1, 1);
-    RooRealVar J9Bar("J9Bar", "J9Bar", 0, -1, 1);
+    RooRealVar J1sBar("J1sBar", "J1sBar", 7, -10, 10);
+    RooRealVar J1cBar("J1cBar", "J1cBar", 4, -10, 10);
+    RooRealVar J2sBar("J2sBar", "J2sBar", 3, -10, 10);
+    RooRealVar J2cBar("J2cBar", "J2cBar", 2, -10, 10);
+    RooRealVar J3Bar("J3Bar", "J3Bar", 0, -10, 10);
+    RooRealVar J4Bar("J4Bar", "J4Bar", 0, -10, 10);
+    RooRealVar J5Bar("J5Bar", "J5Bar", 0, -10, 10);
+    RooRealVar J6sBar("J6sBar", "J6sBar", 0, -10, 10);
+    RooRealVar J7Bar("J7Bar", "J7Bar", 0, -10, 10);
+    RooRealVar J8Bar("J8Bar", "J8Bar", 0, -10, 10);
+    RooRealVar J9Bar("J9Bar", "J9Bar", 0, -10, 10);
 
-    RooRealVar h1s("h1s", "h1s", 0, -1, 1);
-    RooRealVar h1c("h1c", "h1c", 0, -1, 1);
-    RooRealVar h2s("h2s", "h2s", 0, -1, 1);
-    RooRealVar h2c("h2c", "h2c", 0, -1, 1);
-    RooRealVar h3("h3", "h3", 0, -1, 1);
-    RooRealVar h4("h4", "h4", 0, -1, 1);
-    RooRealVar h5("h5", "h5", 0, -1, 1);
-    RooRealVar h6("h6s", "h6s", 0, -1, 1);
-    RooRealVar h7("h7", "h7", 0, -1, 1);
-    RooRealVar h8("h8", "h8", 0, -1, 1);
-    RooRealVar h9("h9", "h9", 0, -1, 1);
+    RooRealVar h1s("h1s", "h1s", 0, -10, 10);
+    RooRealVar h1c("h1c", "h1c", 0, -10, 10);
+    RooRealVar h2s("h2s", "h2s", 0, -10, 10);
+    RooRealVar h2c("h2c", "h2c", 0, -10, 10);
+    RooRealVar h3("h3", "h3", 0, -10, 10);
+    RooRealVar h4("h4", "h4", 0, -10, 10);
+    RooRealVar h5("h5", "h5", 0, -10, 10);
+    RooRealVar h6("h6s", "h6s", 0, -10, 10);
+    RooRealVar h7("h7", "h7", 0, -10, 10);
+    RooRealVar h8("h8", "h8", 0, -10, 10);
+    RooRealVar h9("h9", "h9", 0, -10, 10);
 
-    RooRealVar s1s("s1s", "s1s", 0, -1, 1);
-    RooRealVar s1c("s1c", "s1c", 0, -1, 1);
-    RooRealVar s2s("s2s", "s2s", 0, -1, 1);
-    RooRealVar s2c("s2c", "s2c", 0, -1, 1);
-    RooRealVar s3("s3", "s3", 0, -1, 1);
-    RooRealVar s4("s4", "s4", 0, -1, 1);
-    RooRealVar s5("s5", "s5", 0, -1, 1);
-    RooRealVar s6("s6s", "s6s", 0, -1, 1);
-    RooRealVar s7("s7", "s7", 0, -1, 1);
-    RooRealVar s8("s8", "s8", 0, -1, 1);
-    RooRealVar s9("s9", "s9", 0, -1, 1);
+    RooRealVar s1s("s1s", "s1s", 0, -10, 10);
+    RooRealVar s1c("s1c", "s1c", 0, -10, 10);
+    RooRealVar s2s("s2s", "s2s", 0, -10, 10);
+    RooRealVar s2c("s2c", "s2c", 0, -10, 10);
+    RooRealVar s3("s3", "s3", 0, -10, 10);
+    RooRealVar s4("s4", "s4", 0, -10, 10);
+    RooRealVar s5("s5", "s5", 0, -10, 10);
+    RooRealVar s6("s6s", "s6s", 0, -10, 10);
+    RooRealVar s7("s7", "s7", 0, -10, 10);
+    RooRealVar s8("s8", "s8", 0, -10, 10);
+    RooRealVar s9("s9", "s9", 0, -10, 10);
 
     // RooFormulaVar J1s("J1s", "("
     //                          "(16*(1+x**2)*(1-y**2)) - "
@@ -633,7 +637,7 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar cosThetaK("cosThetaK", "cosThetaK", -1.0, 1.0);
     RooRealVar cosThetaL("cosThetaL", "cosThetaL", -1, 1);
     RooRealVar phi("phi", "phi", -TMath::Pi(), TMath::Pi());
-    RooRealVar t("gamma*t", "gamma*t", 0.0, 10.0);
+    RooRealVar t("t", "t", 0.0, 10.0);
 
     timeDependentB b("b", "b", cosThetaL, cosThetaK, phi, t, x, y, J1s, J1c, J2s,J2c,J3, J4,
     J5, J6s, J7, J8,J9, J1sBar, J1cBar, J2sBar,J2cBar,J3Bar, J4Bar,
@@ -651,19 +655,75 @@ void fitTimeDependent(int nruns, int ngen) {
     type.defineType("B0Bar");
     std::cout << "creating data" << std::endl;
 
+
+
     std::unique_ptr<RooDataSet> bData{b.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), ngen)};
     std::unique_ptr<RooDataSet> bBarData{bBar.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), 0)};
-    RooFitResult* result = b.fitTo(*bData, Save(), EvalBackend("cuda"), Strategy(2), Hesse(true));//FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("cuda"), NumCPU(16)));
-    //
-    // RooDataSet combData("combData", "combined data", RooArgSet(cosThetaL, cosThetaK, phi, t), Index(type),
-    //     Import({{"B0", bData.get()}, {"B0Bar", bBarData.get()}}));
-    //
-    // RooSimultaneous simPdf("simPdf", "Simultaneous PDF", {{"B0", &b}, {"B0Bar", &bBar}}, type);
-    //
-    //
-    // std::cout << "created data" << std::endl;
-    //
-    // RooFitResult* result = simPdf.fitTo(combData, Save(), FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(16)));
+
+    RooArgSet obs(cosThetaL, cosThetaK, phi, t);
+    std::unique_ptr<RooAbsReal> numInt(b.createIntegral(obs));
+    double numVal = numInt->getVal();
+    int code = b.getAnalyticalIntegral(obs, obs, "");
+    double analyticalIntegral = b.analyticalIntegral(code, "range");
+    std::cout << "numVal = " << numVal << std::endl;
+    std::cout << "analyticalIntegral = " << analyticalIntegral << std::endl;
+
+
+
+    // RooFitResult* result = b.fitTo(*bData, Save(), EvalBackend("legacy"), Strategy(2), Hesse(true), NumCPU(12));//FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("cuda"), NumCPU(16)));
+
+
+    RooDataSet combData("combData", "combined data", RooArgSet(cosThetaL, cosThetaK, phi, t), Index(type),
+        Import({{"B0", bData.get()}, {"B0Bar", bBarData.get()}}));
+
+    RooSimultaneous simPdf("simPdf", "Simultaneous PDF", {{"B0", &b}, {"B0Bar", &bBar}}, type);
+
+
+    RooFitResult* result = simPdf.fitTo(combData, Save(), FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(16)));
+
+        RooPlot* fitFrame = cosThetaL.frame(100);
+    RooDataSet* toyData = static_cast<RooDataSet*>(bData.get());
+    RooFitResult* fitResult = const_cast<RooFitResult *>(result);
+    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    TCanvas* fitCanvas = new TCanvas("Fit", "CosThetaL", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/cosThetaL.png");
+    delete fitCanvas;
+
+    fitFrame = cosThetaK.frame(100);
+    toyData = static_cast<RooDataSet*>(bData.get());
+    fitResult = const_cast<RooFitResult *>(result);
+    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "CosThetaK", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/cosThetaK.png");
+    delete fitCanvas;
+
+    fitFrame = phi.frame(100);
+    toyData = static_cast<RooDataSet*>(bData.get());
+    fitResult = const_cast<RooFitResult *>(result);
+    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "phi", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/phi.png");
+    delete fitCanvas;
+
+    fitFrame = t.frame(100);
+    toyData = static_cast<RooDataSet*>(bData.get());
+    fitResult = const_cast<RooFitResult *>(result);
+    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "t", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/t.png");
+    delete fitCanvas;
 
     // RooDataSet test("test", "test", RooArgSet(type));
     // type.setLabel("B0");

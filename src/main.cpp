@@ -434,6 +434,6 @@ int main() {
 //    RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL );
 
     // runTimeDependentUntagged();
-    fitTimeDependent(1, 10000);
+    fitTimeDependent(1, 100000);
     return 0;
 }
