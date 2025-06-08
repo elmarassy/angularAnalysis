@@ -137,16 +137,6 @@ public:
 //             double term5 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (y*y-1);
 //             return (factor*(term1 + term2 + term3 + term4) + term5)/8;
 
-
-
-
-
-             // double c = -3*J1c - 3*J1cBar - 6*J1s - 6*J1sBar + J2c +J2cBar + 2 * (J2s + J2sBar);
-             // double term1 = (6*J1c - 6*J1cBar + 12*J1s - 12*J1sBar - 2*J2c + 2*J2cBar - 4*J2s + 4*J2sBar + x * (-3*s1c - 6*s1s + s2c + 2*s2s)) / (1 + pow(x, 2));
-             // double term2 = c / (y - 1);
-             // double term3 = c / (-y - 1);
-             // double term4 = (3*h1c + 6*h1s - h2c - 2*h2s) * y / (-1 + y*y);
-             // return (term1 + term2 + term3 + term4) / 16;
          }
          return 0 ;
      }
