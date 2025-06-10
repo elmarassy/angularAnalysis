@@ -570,10 +570,10 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar x("x", "x", 26.93);
     RooRealVar y("y", "y", 0.124);
 
-    RooRealVar J1s("J1s", "J1s", 7);
-    RooRealVar J1c("J1c", "J1c", 4, -10, 10);
-    RooRealVar J2s("J2s", "J2s", 3, -10, 10);
-    RooRealVar J2c("J2c", "J2c", 2, -10, 10);
+    RooRealVar J1s("J1s", "J1s", 8);
+    RooRealVar J1c("J1c", "J1c", 8, -10, 10);
+    RooRealVar J2s("J2s", "J2s", 0, -10, 10);
+    RooRealVar J2c("J2c", "J2c", 0, -10, 10);
     RooRealVar J3("J3", "J3", 0, -10, 10);
     RooRealVar J4("J4", "J4", 0, -10, 10);
     RooRealVar J5("J5", "J5", 0, -10, 10);
@@ -582,10 +582,10 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar J8("J8", "J8", 0, -10, 10);
     RooRealVar J9("J9", "J9", 0, -10, 10);
 
-    RooRealVar J1sBar("J1sBar", "J1sBar", 7, -10, 10);
-    RooRealVar J1cBar("J1cBar", "J1cBar", 4, -10, 10);
-    RooRealVar J2sBar("J2sBar", "J2sBar", 3, -10, 10);
-    RooRealVar J2cBar("J2cBar", "J2cBar", 2, -10, 10);
+    RooRealVar J1sBar("J1sBar", "J1sBar", 8, -10, 10);
+    RooRealVar J1cBar("J1cBar", "J1cBar", 8, -10, 10);
+    RooRealVar J2sBar("J2sBar", "J2sBar", 0, -10, 10);
+    RooRealVar J2cBar("J2cBar", "J2cBar", 0, -10, 10);
     RooRealVar J3Bar("J3Bar", "J3Bar", 0, -10, 10);
     RooRealVar J4Bar("J4Bar", "J4Bar", 0, -10, 10);
     RooRealVar J5Bar("J5Bar", "J5Bar", 0, -10, 10);
@@ -606,7 +606,7 @@ void fitTimeDependent(int nruns, int ngen) {
     RooRealVar h8("h8", "h8", 0, -10, 10);
     RooRealVar h9("h9", "h9", 0, -10, 10);
 
-    RooRealVar s1s("s1s", "s1s", 0, -10, 10);
+    RooRealVar s1s("s1s", "s1s", 1, -10, 10);
     RooRealVar s1c("s1c", "s1c", 0, -10, 10);
     RooRealVar s2s("s2s", "s2s", 0, -10, 10);
     RooRealVar s2c("s2c", "s2c", 0, -10, 10);
@@ -653,12 +653,11 @@ void fitTimeDependent(int nruns, int ngen) {
     RooCategory type("type", "type");
     type.defineType("B0");
     type.defineType("B0Bar");
-    std::cout << "creating data" << std::endl;
 
 
 
     std::unique_ptr<RooDataSet> bData{b.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), ngen)};
-    std::unique_ptr<RooDataSet> bBarData{bBar.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), 0)};
+    std::unique_ptr<RooDataSet> bBarData{bBar.generate(RooArgSet(cosThetaL, cosThetaK, phi, t), ngen)};
 
     RooArgSet obs(cosThetaL, cosThetaK, phi, t);
     std::unique_ptr<RooAbsReal> numInt(b.createIntegral(obs));
@@ -679,13 +678,13 @@ void fitTimeDependent(int nruns, int ngen) {
     RooSimultaneous simPdf("simPdf", "Simultaneous PDF", {{"B0", &b}, {"B0Bar", &bBar}}, type);
 
 
-    RooFitResult* result = simPdf.fitTo(combData, Save(), FitOptions(Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(16)));
+    // RooFitResult* result = simPdf.fitTo(combData, Save(), Strategy(2), Hesse(true), Save(true), PrintEvalErrors(0), EvalBackend("legacy"), NumCPU(16));
 
-        RooPlot* fitFrame = cosThetaL.frame(100);
+    RooPlot* fitFrame = cosThetaL.frame(100);
     RooDataSet* toyData = static_cast<RooDataSet*>(bData.get());
-    RooFitResult* fitResult = const_cast<RooFitResult *>(result);
-    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
-    b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    // RooFitResult* fitResult = const_cast<RooFitResult *>(result);
+    // b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    // simPdf.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     toyData->plotOn(fitFrame);
     TCanvas* fitCanvas = new TCanvas("Fit", "CosThetaL", 1600, 1200);
     fitFrame->Draw();
@@ -694,8 +693,8 @@ void fitTimeDependent(int nruns, int ngen) {
 
     fitFrame = cosThetaK.frame(100);
     toyData = static_cast<RooDataSet*>(bData.get());
-    fitResult = const_cast<RooFitResult *>(result);
-    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    // fitResult = const_cast<RooFitResult *>(result);
+    // b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     toyData->plotOn(fitFrame);
     fitCanvas = new TCanvas("Fit", "CosThetaK", 1600, 1200);
@@ -705,8 +704,8 @@ void fitTimeDependent(int nruns, int ngen) {
 
     fitFrame = phi.frame(100);
     toyData = static_cast<RooDataSet*>(bData.get());
-    fitResult = const_cast<RooFitResult *>(result);
-    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    // fitResult = const_cast<RooFitResult *>(result);
+    // b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     toyData->plotOn(fitFrame);
     fitCanvas = new TCanvas("Fit", "phi", 1600, 1200);
@@ -716,13 +715,57 @@ void fitTimeDependent(int nruns, int ngen) {
 
     fitFrame = t.frame(100);
     toyData = static_cast<RooDataSet*>(bData.get());
-    fitResult = const_cast<RooFitResult *>(result);
-    b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
+    // fitResult = const_cast<RooFitResult *>(result);
+    // b.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     b.plotOn(fitFrame, Normalization(bData->sumEntries(), RooAbsReal::NumEvent));
     toyData->plotOn(fitFrame);
     fitCanvas = new TCanvas("Fit", "t", 1600, 1200);
     fitFrame->Draw();
     fitCanvas->SaveAs("fits3/t.png");
+    delete fitCanvas;
+
+    fitFrame = cosThetaL.frame(100);
+    toyData = static_cast<RooDataSet*>(bBarData.get());
+    // fitResult = const_cast<RooFitResult *>(result);
+    // bBar.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    bBar.plotOn(fitFrame, Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "CosThetaL", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/cosThetaLBar.png");
+    delete fitCanvas;
+
+    fitFrame = cosThetaK.frame(100);
+    toyData = static_cast<RooDataSet*>(bBarData.get());
+    // fitResult = const_cast<RooFitResult *>(result);
+    // bBar.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    bBar.plotOn(fitFrame, Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "CosThetaK", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/cosThetaKBar.png");
+    delete fitCanvas;
+
+    fitFrame = phi.frame(100);
+    toyData = static_cast<RooDataSet*>(bBarData.get());
+    // fitResult = const_cast<RooFitResult *>(result);
+    // bBar.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    bBar.plotOn(fitFrame, Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "phi", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/phiBar.png");
+    delete fitCanvas;
+
+    fitFrame = t.frame(100);
+    toyData = static_cast<RooDataSet*>(bBarData.get());
+    // fitResult = const_cast<RooFitResult *>(result);
+    // bBar.plotOn(fitFrame, VisualizeError(*fitResult, 1), FillColor(kYellow), Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    bBar.plotOn(fitFrame, Normalization(bBarData->sumEntries(), RooAbsReal::NumEvent));
+    toyData->plotOn(fitFrame);
+    fitCanvas = new TCanvas("Fit", "t", 1600, 1200);
+    fitFrame->Draw();
+    fitCanvas->SaveAs("fits3/tBar.png");
     delete fitCanvas;
 
     // RooDataSet test("test", "test", RooArgSet(type));
