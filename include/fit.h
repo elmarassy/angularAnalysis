@@ -49,10 +49,6 @@ public:
 
     inline void doEval(RooFit::EvalContext &ctx) const override;
 
-//    void translate(RooFit::Detail::CodeSquashContext &ctx) const override
-//    {
-//        ctx.addResult(this, ctx.buildCall("kstarmumu_pdf", cosThetaL_, cosThetaK_, phi_, J1s_, J1c_, J2s_, J2c_, J3_, J4_, J5_, J6_, J7_, J8_, J9_));
-//    }
     inline int getAnalyticalIntegral(RooArgSet& allVars, RooArgSet& analVars, const char */*rangeName*/) const override {
         if (matchArgs(allVars, analVars, cosThetaL_, cosThetaK_, phi_)) return 1 ;
         return 0 ;

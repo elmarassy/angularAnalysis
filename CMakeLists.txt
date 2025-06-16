@@ -22,7 +22,10 @@ add_executable(cern src/main.cpp
         include/timeDependentFit.h
         src/fit.cpp
         src/timeDependentFit.cpp
-        include/timeDependentFit.h)
+        include/timeDependentFit.h
+        src/newTimeDependentFit.cpp
+        include/newTimeDependentFit.h
+        include/parameterValues.h)
 
 # Link ROOT libraries to your executable
 target_link_libraries(cern ${ROOT_LIBRARIES})

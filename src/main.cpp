@@ -21,7 +21,9 @@
 #include "TError.h"
 
 #include "../include/fit.h"
-#include "../include/timeDependentFit.h"
+//#include "../include/timeDependentFit.h"
+#include "../include/newTimeDependentFit.h"
+
 using namespace RooFit;
 
 
@@ -429,11 +431,11 @@ void runTimeDependentTagged() {
 }
 
 int main() {
-//    gErrorIgnoreLevel = kFatal + 1;
-//    RooMsgService::instance().setStreamStatus(0, false);
-//    RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL );
+    gErrorIgnoreLevel = kFatal + 1;
+    RooMsgService::instance().setStreamStatus(0, false);
+    RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL );
 
     // runTimeDependentUntagged();
-    fitTimeDependent(1, 100000);
+    runFit(2000, 1000, true);
     return 0;
 }
