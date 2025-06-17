@@ -2,6 +2,7 @@
 // Created by Mero Elmarassy on 6/10/25.
 //
 #include <TF1.h>
+#include <TFitResult.h>
 #include <TPaveText.h>
 #include <RooCategory.h>
 #include <RooSimultaneous.h>
@@ -13,28 +14,27 @@
 #include "TStyle.h"
 #include <RooFitResult.h>
 #include <RooPlot.h>
-#include <format>
 #include <RooProdPdf.h>
 #include <RooAddPdf.h>
-#include <RooGaussModel.h>
 #include <RooFFTConvPdf.h>
-#include <RooGaussian.h>
+#include <TFile.h>
+
 #include "../include/newTimeDependentFit.h"
 #include "../include/parameterValues.h"
 
 using namespace RooFit;
 
 timeDependent::timeDependent(const char *name, const char *title,
-                               RooAbsReal& cosThetaL, RooAbsReal& cosThetaK, RooAbsReal& phi, RooAbsReal& t,
-                               int sign, RooAbsReal& x, RooAbsReal& y, RooAbsReal& gamma,
-                               RooAbsReal& K1s, RooAbsReal& K1c, RooAbsReal& K2s, RooAbsReal& K2c, RooAbsReal& K3,
-                               RooAbsReal& K4, RooAbsReal& K5, RooAbsReal& K6s, RooAbsReal& K7, RooAbsReal& K8, RooAbsReal& K9,
-                               RooAbsReal& W1s, RooAbsReal& W1c, RooAbsReal& W2s, RooAbsReal& W2c, RooAbsReal& W3,
-                               RooAbsReal& W4, RooAbsReal& W5, RooAbsReal& W6s, RooAbsReal& W7, RooAbsReal& W8, RooAbsReal& W9,
-                               RooAbsReal& H1s, RooAbsReal& H1c, RooAbsReal& H2s, RooAbsReal& H2c, RooAbsReal& H3,
-                               RooAbsReal& H4, RooAbsReal& H5, RooAbsReal& H6s, RooAbsReal& H7, RooAbsReal& H8, RooAbsReal& H9,
-                               RooAbsReal& Z1s, RooAbsReal& Z1c, RooAbsReal& Z2s, RooAbsReal& Z2c, RooAbsReal& Z3,
-                               RooAbsReal& Z4, RooAbsReal& Z5, RooAbsReal& Z6s, RooAbsReal& Z7, RooAbsReal& Z8, RooAbsReal& Z9):
+                             RooAbsReal& cosThetaL, RooAbsReal& cosThetaK, RooAbsReal& phi, RooAbsReal& t,
+                             int sign, RooAbsReal& x, RooAbsReal& y,
+                             RooAbsReal& K1s, RooAbsReal& K1c, RooAbsReal& K2s, RooAbsReal& K2c, RooAbsReal& K3,
+                             RooAbsReal& K4, RooAbsReal& K5, RooAbsReal& K6s, RooAbsReal& K7, RooAbsReal& K8, RooAbsReal& K9,
+                             RooAbsReal& W1s, RooAbsReal& W1c, RooAbsReal& W2s, RooAbsReal& W2c, RooAbsReal& W3,
+                             RooAbsReal& W4, RooAbsReal& W5, RooAbsReal& W6s, RooAbsReal& W7, RooAbsReal& W8, RooAbsReal& W9,
+                             RooAbsReal& H1s, RooAbsReal& H1c, RooAbsReal& H2s, RooAbsReal& H2c, RooAbsReal& H3,
+                             RooAbsReal& H4, RooAbsReal& H5, RooAbsReal& H6s, RooAbsReal& H7, RooAbsReal& H8, RooAbsReal& H9,
+                             RooAbsReal& Z1s, RooAbsReal& Z1c, RooAbsReal& Z2s, RooAbsReal& Z2c, RooAbsReal& Z3,
+                             RooAbsReal& Z4, RooAbsReal& Z5, RooAbsReal& Z6s, RooAbsReal& Z7, RooAbsReal& Z8, RooAbsReal& Z9):
         RooAbsPdf(name, title),
         sign_(sign),
         cosThetaL_("costhetal", "costhetal", this, cosThetaL),
@@ -43,7 +43,6 @@ timeDependent::timeDependent(const char *name, const char *title,
         t_("t", "t", this, t),
         x_("x", "x", this, x),
         y_("y", "y", this, y),
-        gamma_("gamma", "gamma", this, gamma),
         K1s_("K1s", "K1s", this, K1s),
         K1c_("K1c", "K1c", this, K1c),
         K2s_("K2s", "K2s", this, K2s),
@@ -89,7 +88,6 @@ timeDependent::timeDependent(const char *name, const char *title,
         Z8_("Z8", "Z8", this, Z8),
         Z9_("Z9", "Z9", this, Z9) {}
 
-
 timeDependent::timeDependent(timeDependent const &other, const char *name):
         RooAbsPdf(other, name),
         sign_(other.sign_),
@@ -99,7 +97,6 @@ timeDependent::timeDependent(timeDependent const &other, const char *name):
         t_("t", this, other.t_),
         x_("x", this, other.x_),
         y_("y", this, other.y_),
-        gamma_("gamma", this, other.gamma_),
         K1s_("K1s", this, other.K1s_),
         K1c_("K1c", this, other.K1c_),
         K2s_("K2s", this, other.K2s_),
@@ -145,11 +142,11 @@ timeDependent::timeDependent(timeDependent const &other, const char *name):
         Z8_("Z8", this, other.Z8_),
         Z9_("Z9", this, other.Z9_) {}
 
-inline double timeDependent::evaluate_prob(double cosThetaL, double cosThetaK, double phi, double t, int sign, double x, double y, double gamma,
-                                            double K1s, double K1c, double K2s, double K2c, double K3, double K4, double K5, double K6s, double K7, double K8, double K9,
-                                            double W1s, double W1c, double W2s, double W2c, double W3, double W4, double W5, double W6s, double W7, double W8, double W9,
-                                            double H1s, double H1c, double H2s, double H2c, double H3, double H4, double H5, double H6s, double H7, double H8, double H9,
-                                            double Z1s, double Z1c, double Z2s, double Z2c, double Z3, double Z4, double Z5, double Z6s, double Z7, double Z8, double Z9) const {
+inline double timeDependent::evaluate_prob(double cosThetaL, double cosThetaK, double phi, double t, int sign, double x, double y,
+                                           double K1s, double K1c, double K2s, double K2c, double K3, double K4, double K5, double K6s, double K7, double K8, double K9,
+                                           double W1s, double W1c, double W2s, double W2c, double W3, double W4, double W5, double W6s, double W7, double W8, double W9,
+                                           double H1s, double H1c, double H2s, double H2c, double H3, double H4, double H5, double H6s, double H7, double H8, double H9,
+                                           double Z1s, double Z1c, double Z2s, double Z2c, double Z3, double Z4, double Z5, double Z6s, double Z7, double Z8, double Z9) const {
 
     const double c = 9.0/32.0/TMath::Pi();
     const double cosThetaL2 = cosThetaL * cosThetaL;
@@ -163,14 +160,14 @@ inline double timeDependent::evaluate_prob(double cosThetaL, double cosThetaK, d
     const double sin2ThetaL = 2.0 * sinThetaL * cosThetaL;
     const double sin2ThetaK = 2.0 * sinThetaK * cosThetaK;
 
-    const double cosh_ygt = cosh(y * gamma * t);
-    const double sinh_ygt = sinh(y * gamma * t);
-    const double cos_xgt = cos(x * gamma * t);
-    const double sin_xgt = sin(x * gamma * t);
-    const double decay = exp(-1 * gamma * t);
+    const double cosh_yt = cosh(y * t);
+    const double sinh_yt = sinh(y * t);
+    const double cos_xt = cos(x * t);
+    const double sin_xt = sin(x * t);
+    const double decay = exp(-1 * t);
 
     auto helper = [=](double coshFactor, double cosFactor, double Hi, double Zi) {
-        return coshFactor * cosh_ygt - Hi * sinh_ygt + sign * (cosFactor * cos_xgt - Zi * sin_xgt);
+        return coshFactor * cosh_yt - Hi * sinh_yt + sign * (cosFactor * cos_xt - Zi * sin_xt);
     };
 
     return 0.5 * c * decay * (
@@ -210,40 +207,112 @@ void plotInitial(RooRealVar& variable, RooDataSet* fitData, RooAbsPdf& pdf, char
     delete fitCanvas;
 }
 
+void resetPdf(RooSimultaneous* pdf, const RooArgSet& observables) {
+    for (auto p: *pdf->getParameters(observables)) {
+        auto param = dynamic_cast<RooRealVar *>(p);
+        param->setVal(testValues.at(param->GetName()));
+    }
+}
+
 std::map<std::string, TH1F*> RunPullStudy(RooSimultaneous* pdf,
                                           RooCategory type,
                                           const RooArgSet& observables,
                                           const std::map<std::string, double>& trueValues,
+                                          bool asymmetric,
                                           int nToys = 100, int nEvents = 500) {
 
     std::map<std::string, TH1F*> pullHists;
-    for (auto p: trueValues) {
-        pullHists[p.first] = new TH1F(Form("%s", p.first.c_str()), Form("%s", p.first.c_str()), 50, -10, 10);
-    }
-    std::unique_ptr<RooSimultaneous> truePdf((RooSimultaneous*)pdf->Clone("truePdf"));
 
+    for (auto p: trueValues) {
+        pullHists[p.first] = new TH1F(Form("%s", p.first.c_str()), Form("%s", p.first.c_str()), 100, -8, 8);
+    }
+    auto fullObservables = static_cast<RooArgSet*>(observables.Clone());
+    fullObservables->add(type);
     for (int i = 0; i < nToys; i++) {
-        std::unique_ptr<RooDataSet> bData{truePdf->getPdf("B0")->generate(observables, nEvents)};
-        std::unique_ptr<RooDataSet> bBarData{truePdf->getPdf("B0")->generate(observables, nEvents)};
+        std::unique_ptr<RooDataSet> bData{pdf->getPdf("B0")->generate(observables, nEvents)};
+        std::unique_ptr<RooDataSet> bBarData{pdf->getPdf("B0Bar")->generate(observables, nEvents)};
 
         RooDataSet toy("combData", "combined data", observables, Index(type),
-                            Import({{"B0", bData.get()}, {"B0Bar", bBarData.get()}}));
+                       Import({{"B0", bData.get()}, {"B0Bar", bBarData.get()}}));
 
-        std::unique_ptr<RooFitResult> fitResult(pdf->fitTo(toy,Save(true), Hesse(true), Strategy(2), Verbose(false)));
+        std::unique_ptr<RooFitResult> fitResult(pdf->fitTo(toy, Save(true), Minos(asymmetric), Hesse(true), Strategy(2), PrintLevel(-1), EvalBackend("legacy"), NumCPU(10)));
 
+        if (fitResult->status() != 0) {
+            i --;
+            std::cout << "Invalid minimum (status " << fitResult->status() << "), retrying..." << std::endl;
+            continue;
+        }
         for (auto& p : trueValues) {
-            RooRealVar* par = dynamic_cast<RooRealVar*>(fitResult->floatParsFinal().find(p.first.c_str()));
-            if (par && par->getError() > 0) {
-                double pull = (par->getVal() - p.second) / par->getError();
-                pullHists[p.first]->Fill(pull);
+            auto* par = dynamic_cast<RooRealVar*>(fitResult->floatParsFinal().find(p.first.c_str()));
+            if (asymmetric) {
+                if (par && par->getAsymErrorLo() < 0 && par->getAsymErrorHi() > 0) {
+                    double pull = (par->getVal() - p.second) / par->getAsymErrorHi();
+                    if (par->getVal() - p.second > 0) {
+                        pull = -(par->getVal() - p.second) / par->getAsymErrorLo();
+                    }
+                    pullHists[p.first]->Fill(pull);
+                }
+            } else {
+                if (par && par->getError() > 0) {
+                    double pull = (par->getVal() - p.second) / par->getError();
+                    pullHists[p.first]->Fill(pull);
+                }
             }
         }
+        resetPdf(pdf, *fullObservables);
+        std::cout << "Completed toy #" << i << std::endl;
     }
     return pullHists;
 }
 
-void plotPulls(const std::map<std::string, TH1F*>& pulls, bool approx) {
+void plotPulls(const char *const filename, const std::map<std::string, TH1F*>& pulls, bool approx) {
+    gStyle->SetOptStat(0);
     std::map<std::string, std::vector<TH1F*>> groups;
+    std::unique_ptr<TFile> outFile( TFile::Open(filename, "RECREATE", "pulls") );
+
+    TDirectory* dir = outFile->mkdir("pulls");
+    dir->cd();
+    if (!outFile->IsOpen()) {
+        std::cerr << "Error: cannot open file " << filename << std::endl;
+        return;
+    }
+
+    for (const auto& param: pulls) {
+        auto hist = param.second;
+        if (hist->GetEntries() == 0) {
+            continue;
+        }
+        hist->SetLineColor(kBlue);
+        hist->SetFillColorAlpha(kBlue, 0.3);
+        hist->SetMarkerStyle(20);
+        hist->SetMarkerColor(kBlue);
+        hist->SetTitle(hist->GetName());
+        hist->GetXaxis()->SetTitle("Pull");
+        gStyle->SetOptStat(0);
+        hist->Draw("hist");
+
+        TF1* gaussian = new TF1("gaus","gaus",-5,5);
+        gaussian->SetParameters(hist->GetMaximum(), hist->GetMean(), hist->GetRMS());
+        auto b = hist->Fit(gaussian, "Q S");
+        TF1* fit = hist->GetFunction("gaus");
+
+        if (fit) {
+            fit->SetLineColor(kRed);
+            fit->SetLineWidth(2);
+            fit->Draw("same");
+
+            double mean = fit->GetParameter(1);
+            double sigma = fit->GetParameter(2);
+
+            TPaveText* pave = new TPaveText(0.65, 0.7, 0.9, 0.9, "NDC");
+            pave->AddText(Form("mean = %.3f", mean));
+            pave->AddText(Form("#sigma = %.3f", sigma));
+            pave->Draw();
+        }
+        hist->SetTitle(Form("Pull for %s", param.first.c_str()));
+        hist->Write();
+    }
+
     for (const auto& [param, hist] : pulls) {
         std::string prefix(1, param[0]);
         if (std::isupper(prefix[0]) && hist->GetEntries() != 0) groups[prefix].push_back(hist);
@@ -262,39 +331,20 @@ void plotPulls(const std::map<std::string, TH1F*>& pulls, bool approx) {
         int pad = 1;
         for (auto* hist : hists) {
             c->cd(pad++);
-            hist->SetLineColor(kBlue);
-            hist->SetFillColorAlpha(kBlue, 0.3);
-            hist->SetMarkerStyle(20);
-            hist->SetMarkerColor(kBlue);
-            hist->SetTitle(hist->GetName());
-            hist->GetXaxis()->SetTitle("Pull");
-
-            hist->Draw("HIST");
-
-            TF1* gaussian = new TF1("gaus","gaus",-5,5);
-            gaussian->SetParameters(1, 0, 1);
-            hist->Fit(gaussian, "Q");
-
-            TF1* fit = hist->GetFunction("gaus");
-            if (fit) {
-                fit->SetLineColor(kRed);
-                fit->SetLineWidth(2);
-                fit->Draw("same");
-
-                double mean = fit->GetParameter(1);
-                double sigma = fit->GetParameter(2);
-
-                TPaveText* pave = new TPaveText(0.65, 0.7, 0.9, 0.9, "NDC");
-                pave->AddText(Form("Mean = %.3f", mean));
-                pave->AddText(Form("#sigma = %.3f", sigma));
-                pave->Draw();
-            }
+            hist->Draw("hist");
         }
         c->Update();
+        outFile->cd();
+        c->Write();
         if (approx) c->SaveAs(Form("timeDependent/approxPulls/%s.png", type.c_str()));
         else c->SaveAs(Form("timeDependent/pulls/%s.png", type.c_str()));
-
+        delete c;
     }
+    outFile->cd();
+    outFile->Write();
+    outFile->Print();
+    outFile->Close();
+
 }
 
 void runFit(int nEvents, int nToys, bool useApproximation) {
@@ -313,12 +363,11 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
         if (!floating) {
             return std::make_unique<RooRealVar>(name, name, testValues.at(name));
         }
-        return std::make_unique<RooRealVar>(name, name, testValues.at(name), -4*abs(testValues.at(name)), 4*abs(testValues.at(name)));
+        return std::make_unique<RooRealVar>(name, name, testValues.at(name), -1 -4*abs(testValues.at(name)), 1 + 4*abs(testValues.at(name)));
     };
 
     auto x = makeParam("x", false);
     auto y = makeParam("y", false);
-    auto gamma = makeParam("gamma", false);
 
     auto K1c = makeParam("K1c");
     auto K3 = makeParam("K3");
@@ -392,17 +441,17 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
     RooRealVar phi("phi", "phi", -TMath::Pi(), TMath::Pi());
     RooRealVar t("t", "t", 0, 10);
 
-    timeDependent b("b", "b", cosThetaL, cosThetaK, phi, t, 1, *x, *y, *gamma,
+    timeDependent b("b", "b", cosThetaL, cosThetaK, phi, t, 1, *x, *y,
                     *K1s, *K1c, *K2s, *K2c, *K3, *K4, *K5, *K6s, *K7, *K8, *K9,
                     *W1s, *W1c, *W2s, *W2c, *W3, *W4, *W5, *W6s, *W7, *W8, *W9,
                     *H1s, *H1c, *H2s, *H2c, *H3, *H4, *H5, *H6s, *H7, *H8, *H9,
                     *Z1s, *Z1c, *Z2s, *Z2c, *Z3, *Z4, *Z5, *Z6s, *Z7, *Z8, *Z9);
 
-    timeDependent bBar("bBar", "bBar", cosThetaL, cosThetaK, phi, t, -1, *x, *y, *gamma,
-                *K1s, *K1c, *K2s, *K2c, *K3, *K4, *K5, *K6s, *K7, *K8, *K9,
-                *W1s, *W1c, *W2s, *W2c, *W3, *W4, *W5, *W6s, *W7, *W8, *W9,
-                *H1s, *H1c, *H2s, *H2c, *H3, *H4, *H5, *H6s, *H7, *H8, *H9,
-                *Z1s, *Z1c, *Z2s, *Z2c, *Z3, *Z4, *Z5, *Z6s, *Z7, *Z8, *Z9);
+    timeDependent bBar("bBar", "bBar", cosThetaL, cosThetaK, phi, t, -1, *x, *y,
+                       *K1s, *K1c, *K2s, *K2c, *K3, *K4, *K5, *K6s, *K7, *K8, *K9,
+                       *W1s, *W1c, *W2s, *W2c, *W3, *W4, *W5, *W6s, *W7, *W8, *W9,
+                       *H1s, *H1c, *H2s, *H2c, *H3, *H4, *H5, *H6s, *H7, *H8, *H9,
+                       *Z1s, *Z1c, *Z2s, *Z2c, *Z3, *Z4, *Z5, *Z6s, *Z7, *Z8, *Z9);
 
     RooCategory type("type", "type");
     type.defineType("B0");
@@ -441,7 +490,7 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
 //    plot(phi, bBarFitData, result, *bBar.createProjection(RooArgSet(cosThetaL, cosThetaK, t)), "timeDependent/fits/B0bar/phi.png");
 //    plot(t, bBarFitData, result, *bBar.createProjection(RooArgSet(cosThetaL, cosThetaK, phi)), "timeDependent/fits/B0bar/t.png");
 
-    std::map<std::string, TH1F*> pulls = RunPullStudy(&simPdf, type, observables, testValues, nToys, nEvents);
-    plotPulls(pulls, useApproximation);
+    std::map<std::string, TH1F*> pulls = RunPullStudy(&simPdf, type, observables, testValues, false, nToys, nEvents);
+    plotPulls("pulls.root", pulls, useApproximation);
 
 }

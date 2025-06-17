@@ -18,7 +18,7 @@ class timeDependent: public RooAbsPdf {
 public:
     timeDependent(const char *name, const char *title,
                   RooAbsReal &cosThetaL, RooAbsReal &cosThetaK, RooAbsReal &phi, RooAbsReal &t,
-                  int sign, RooAbsReal &x, RooAbsReal &y, RooAbsReal &gamma,
+                  int sign, RooAbsReal &x, RooAbsReal &y,
                   RooAbsReal &K1s, RooAbsReal &K1c, RooAbsReal &K2s, RooAbsReal &K2c, RooAbsReal &K3,
                   RooAbsReal &K4, RooAbsReal &K5, RooAbsReal &K6s, RooAbsReal &K7, RooAbsReal &K8, RooAbsReal &K9,
                   RooAbsReal &W1s, RooAbsReal &W1c, RooAbsReal &W2s, RooAbsReal &W2c, RooAbsReal &W3,
@@ -42,7 +42,6 @@ protected:
     RooRealProxy t_;
     RooRealProxy x_;
     RooRealProxy y_;
-    RooRealProxy gamma_;
     RooRealProxy K1s_;
     RooRealProxy K1c_;
     RooRealProxy K2s_;
@@ -89,7 +88,7 @@ protected:
     RooRealProxy Z9_;
 
     inline double
-    evaluate_prob(double cosThetaL, double cosThetaK, double phi, double t, int sign, double x, double y, double gamma,
+    evaluate_prob(double cosThetaL, double cosThetaK, double phi, double t, int sign, double x, double y,
                   double K1s, double K1c, double K2s, double K2c, double K3, double K4, double K5, double K6s,
                   double K7, double K8, double K9,
                   double W1s, double W1c, double W2s, double W2c, double W3, double W4, double W5, double W6s,
@@ -101,7 +100,7 @@ protected:
 
 public:
     inline double evaluate() const override {
-        return evaluate_prob(cosThetaL_, cosThetaK_, phi_, t_, sign_, x_, y_, gamma_,
+        return evaluate_prob(cosThetaL_, cosThetaK_, phi_, t_, sign_, x_, y_,
                              K1s_, K1c_, K2s_, K2c_, K3_, K4_, K5_, K6s_, K7_, K8_, K9_,
                              W1s_, W1c_, W2s_, W2c_, W3_, W4_, W5_, W6s_, W7_, W8_, W9_,
                              H1s_, H1c_, H2s_, H2c_, H3_, H4_, H5_, H6s_, H7_, H8_, H9_,
@@ -116,7 +115,6 @@ public:
         std::span<const double> phiSpan = ctx.at(phi_);
         std::span<const double> xSpan = ctx.at(x_);
         std::span<const double> ySpan = ctx.at(y_);
-        std::span<const double> gammaSpan = ctx.at(gamma_);
 
         std::span<const double> K1sSpan = ctx.at(K1s_);
         std::span<const double> K1cSpan = ctx.at(K1c_);
@@ -172,7 +170,6 @@ public:
                                             sign_,
                                             xSpan.size() > 1 ? xSpan[i] : xSpan[0],
                                             ySpan.size() > 1 ? ySpan[i] : ySpan[0],
-                                            gammaSpan.size() > 1 ? gammaSpan[i] : gammaSpan[0],
 
                                             K1sSpan.size() > 1 ? K1sSpan[i] : K1sSpan[0],
                                             K1cSpan.size() > 1 ? K1cSpan[i] : K1cSpan[0],

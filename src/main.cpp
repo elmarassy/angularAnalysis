@@ -427,7 +427,6 @@ void runTimeDependentTagged() {
     delete fitCanvas;
 
     std::cout << "Processed " << nruns << " toys with " << ngen << " events in " << std::chrono::duration<double, std::milli>(t_after_toystudy-t_before_toystudy).count()/1000 << "s" << std::endl;
-
 }
 
 int main() {
@@ -436,6 +435,6 @@ int main() {
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL );
 
     // runTimeDependentUntagged();
-    runFit(2000, 1000, true);
+    runFit(100000, 200, true);
     return 0;
 }
