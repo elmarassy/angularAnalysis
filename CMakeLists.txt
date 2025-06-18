@@ -21,9 +21,11 @@ add_executable(cern src/main.cpp
         src/fit.cpp
         src/timeDependentFit.cpp
         include/timeDependentFit.h
-        src/newTimeDependentFit.cpp
-        include/newTimeDependentFit.h
-        include/parameterValues.h)
+        src/individualTimeDependent.cpp
+        include/individualTimeDependent.h
+        include/parameterValues.h
+        src/plotting.cpp
+        include/plotting.h)
 
 target_link_libraries(cern ${ROOT_LIBRARIES})
 

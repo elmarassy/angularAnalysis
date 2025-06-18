@@ -2,8 +2,8 @@
 // Created by Mero Elmarassy on 6/10/25.
 //
 
-#ifndef CERN_NEWTIMEDEPENDENTFIT_H
-#define CERN_NEWTIMEDEPENDENTFIT_H
+#ifndef CERN_INDIVIDUALTIMEDEPENDENT_H
+#define CERN_INDIVIDUALTIMEDEPENDENT_H
 
 
 #include "TMath.h"
@@ -271,7 +271,7 @@ public:
 
             return (1./8)*(
                     (-3*K1c - 6*K1s + K2c + 2*K2s + (3*H1c + 6*H1s - H2c - 2*H2s)*y)/(-1 + y*y) +
-                    sign_ * (3*W1c + 6*W1s - W2c - 2*W2s - (3*Z1c + 6*Z1s - Z2c - 2*Z2s)*x)/(1 + x*x));
+                    (3*W1c + 6*W1s - W2c - 2*W2s - (3*Z1c + 6*Z1s - Z2c - 2*Z2s)*x)/(1 + x*x));
         }
 
         if (code == 6) {
@@ -327,7 +327,7 @@ public:
     }
 };
 
-void runFit(int nEvents, int nToys, bool useApproximation);
+void runFit(int nEvents, int nToys, bool masslessApproximation, bool normalizeBothPdfs=false);
 
 
-#endif //CERN_NEWTIMEDEPENDENTFIT_H
+#endif //CERN_INDIVIDUALTIMEDEPENDENT_H

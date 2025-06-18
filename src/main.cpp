@@ -22,7 +22,7 @@
 
 #include "../include/fit.h"
 //#include "../include/timeDependentFit.h"
-#include "../include/newTimeDependentFit.h"
+#include "../include/individualTimeDependent.h"
 
 using namespace RooFit;
 
@@ -434,7 +434,6 @@ int main() {
     RooMsgService::instance().setStreamStatus(0, false);
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL );
 
-    // runTimeDependentUntagged();
-    runFit(100000, 200, true);
+    runFit(2000, 200, true, false);
     return 0;
 }

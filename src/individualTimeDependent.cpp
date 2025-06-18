@@ -19,7 +19,7 @@
 #include <RooFFTConvPdf.h>
 #include <TFile.h>
 
-#include "../include/newTimeDependentFit.h"
+#include "../include/individualTimeDependent.h"
 #include "../include/parameterValues.h"
 
 using namespace RooFit;
@@ -226,8 +226,10 @@ std::map<std::string, TH1F*> RunPullStudy(RooSimultaneous* pdf,
     for (auto p: trueValues) {
         pullHists[p.first] = new TH1F(Form("%s", p.first.c_str()), Form("%s", p.first.c_str()), 100, -8, 8);
     }
+
     auto fullObservables = static_cast<RooArgSet*>(observables.Clone());
     fullObservables->add(type);
+
     for (int i = 0; i < nToys; i++) {
         std::unique_ptr<RooDataSet> bData{pdf->getPdf("B0")->generate(observables, nEvents)};
         std::unique_ptr<RooDataSet> bBarData{pdf->getPdf("B0Bar")->generate(observables, nEvents)};
@@ -347,7 +349,7 @@ void plotPulls(const char *const filename, const std::map<std::string, TH1F*>& p
 
 }
 
-void runFit(int nEvents, int nToys, bool useApproximation) {
+void runFit(int nEvents, int nToys, bool masslessApproximation, bool normalizeBothPdfs) {
 
     std::unique_ptr<RooAbsReal> K1s;
     std::unique_ptr<RooAbsReal> K2s;
@@ -356,14 +358,19 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
     std::unique_ptr<RooAbsReal> W2c;
     std::unique_ptr<RooAbsReal> H2s;
     std::unique_ptr<RooAbsReal> H2c;
+    std::unique_ptr<RooAbsReal> Z1s;
     std::unique_ptr<RooAbsReal> Z2s;
     std::unique_ptr<RooAbsReal> Z2c;
 
     auto makeParam = [=](const char *name, bool floating=true) {
         if (!floating) {
-            return std::make_unique<RooRealVar>(name, name, testValues.at(name));
+            auto temp = std::make_unique<RooRealVar>(name, name, testValues.at(name));
+            temp->setError(0);
+            return temp;
         }
-        return std::make_unique<RooRealVar>(name, name, testValues.at(name), -1 -4*abs(testValues.at(name)), 1 + 4*abs(testValues.at(name)));
+        auto temp = std::make_unique<RooRealVar>(name, name, testValues.at(name), -1 -4*abs(testValues.at(name)), 1 + 4*abs(testValues.at(name)));
+        temp->setError(0);
+        return temp;
     };
 
     auto x = makeParam("x", false);
@@ -398,7 +405,7 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
     auto H8 = makeParam("H8");
     auto H9 = makeParam("H9");
 
-    auto Z1s = makeParam("Z1s");
+//    auto Z1s = makeParam("Z1s");
     auto Z1c = makeParam("Z1c");
     auto Z3 = makeParam("Z3");
     auto Z4 = makeParam("Z4");
@@ -408,9 +415,9 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
     auto Z8 = makeParam("Z8");
     auto Z9 = makeParam("Z9");
 
-    if (useApproximation) {
-        K1s = std::make_unique<RooFormulaVar>("K1s", "(3.0/4.0) * (1 - K1c + y*H1c) + y*H1s", RooArgSet(*K1c, *H1s, *H1c, *y));
-        K2s = std::make_unique<RooFormulaVar>("K2s", "(1.0/4.0) * (1 - K1c + y*H1c) + y*H1s / 3.0", RooArgSet(*K1c, *H1s, *H1c, *y));
+    if (masslessApproximation) {
+        K1s = std::make_unique<RooFormulaVar>("K1s", "(3.0/4.0) * (1 - y*y - K1c + y*H1c) + y*H1s", RooArgSet(*K1c, *H1s, *H1c, *y));
+        K2s = std::make_unique<RooFormulaVar>("K2s", "(1.0/4.0) * (1 - y*y - K1c + y*H1c) + y*H1s / 3.0", RooArgSet(*K1c, *H1s, *H1c, *y));
         K2c = std::make_unique<RooFormulaVar>("K2c", "-K1c", RooArgSet(*K1c));
 
         W2s = std::make_unique<RooFormulaVar>("W2s", "W1s / 3.0", RooArgSet(*W1s));
@@ -419,7 +426,13 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
         H2s = std::make_unique<RooFormulaVar>("H2s", "H1s/3", RooArgSet(*H1s));
         H2c = std::make_unique<RooFormulaVar>("H2c", "-H1c", RooArgSet(*H1c));
 
-        Z2s = std::make_unique<RooFormulaVar>("Z2s", "Z1s/3", RooArgSet(*Z1s));
+        if (normalizeBothPdfs) {
+            Z1s = std::make_unique<RooFormulaVar>("Z1s", "(3.0/16.0) * ((16.0*W1s/3.0 + 4*W1c)/x - 4*Z1c)", RooArgSet(*W1s, *W1c, *Z1c, *x));
+            Z2s = std::make_unique<RooFormulaVar>("Z2s", "(1.0/16.0) * ((16.0*W1s/3.0 + 4*W1c)/x - 4*Z1c)", RooArgSet(*W1s, *W1c, *Z1c, *x));
+        } else {
+            Z1s = makeParam("Z1s");
+            Z2s = std::make_unique<RooFormulaVar>("Z2s", "Z1s/3", RooArgSet(*Z1s));
+        }
         Z2c = std::make_unique<RooFormulaVar>("Z2c", "-Z1c", RooArgSet(*Z1c));
     } else {
         K2c = makeParam("K2c");
@@ -428,6 +441,7 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
         W2c = makeParam("W2c");
         H2s = makeParam("H2s");
         H2c = makeParam("H2c");
+        Z1s = makeParam("Z1s");
         Z2s = makeParam("Z2s");
         Z2c = makeParam("Z2c");
 
@@ -491,6 +505,6 @@ void runFit(int nEvents, int nToys, bool useApproximation) {
 //    plot(t, bBarFitData, result, *bBar.createProjection(RooArgSet(cosThetaL, cosThetaK, phi)), "timeDependent/fits/B0bar/t.png");
 
     std::map<std::string, TH1F*> pulls = RunPullStudy(&simPdf, type, observables, testValues, false, nToys, nEvents);
-    plotPulls("pulls.root", pulls, useApproximation);
+    plotPulls("testing.root", pulls, masslessApproximation);
 
 }
