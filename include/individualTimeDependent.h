@@ -87,16 +87,48 @@ protected:
     RooRealProxy Z8_;
     RooRealProxy Z9_;
 
-    inline double
-    evaluate_prob(double cosThetaL, double cosThetaK, double phi, double t, int sign, double x, double y,
-                  double K1s, double K1c, double K2s, double K2c, double K3, double K4, double K5, double K6s,
-                  double K7, double K8, double K9,
-                  double W1s, double W1c, double W2s, double W2c, double W3, double W4, double W5, double W6s,
-                  double W7, double W8, double W9,
-                  double H1s, double H1c, double H2s, double H2c, double H3, double H4, double H5, double H6s,
-                  double H7, double H8, double H9,
-                  double Z1s, double Z1c, double Z2s, double Z2c, double Z3, double Z4, double Z5, double Z6s,
-                  double Z7, double Z8, double Z9) const;
+    inline double evaluate_prob(double cosThetaL, double cosThetaK, double phi, double t, int sign, double x, double y,
+                                               double K1s, double K1c, double K2s, double K2c, double K3, double K4, double K5, double K6s, double K7, double K8, double K9,
+                                               double W1s, double W1c, double W2s, double W2c, double W3, double W4, double W5, double W6s, double W7, double W8, double W9,
+                                               double H1s, double H1c, double H2s, double H2c, double H3, double H4, double H5, double H6s, double H7, double H8, double H9,
+                                               double Z1s, double Z1c, double Z2s, double Z2c, double Z3, double Z4, double Z5, double Z6s, double Z7, double Z8, double Z9) const {
+
+        const double c = 9.0/32.0/TMath::Pi();
+        const double cosThetaL2 = cosThetaL * cosThetaL;
+        const double cosThetaK2 = cosThetaK * cosThetaK;
+        const double cos2ThetaL = 2.0 * cosThetaL2 - 1.0;
+        const double sinThetaK2 = 1.0 - cosThetaK2;
+        const double sinThetaL2 = 1.0 - cosThetaL2;
+        const double sinThetaL = sqrt(sinThetaL2);
+        const double sinThetaK = sqrt(sinThetaK2);
+
+        const double sin2ThetaL = 2.0 * sinThetaL * cosThetaL;
+        const double sin2ThetaK = 2.0 * sinThetaK * cosThetaK;
+
+        const double cosh_yt = cosh(y * t);
+        const double sinh_yt = sinh(y * t);
+        const double cos_xt = cos(x * t);
+        const double sin_xt = sin(x * t);
+        const double decay = exp(-1 * t);
+
+        auto helper = [=](double coshFactor, double cosFactor, double Hi, double Zi) {
+            return coshFactor * cosh_yt - Hi * sinh_yt + sign * (cosFactor * cos_xt - Zi * sin_xt);
+        };
+
+        return 0.5 * c * decay * (
+                helper(K1s, W1s, H1s, Z1s) * sinThetaK2 +
+                helper(K1c, W1c, H1c, Z1c) * cosThetaK2 +
+                helper(K2s, W2s, H2s, Z2s) * sinThetaK2 * cos2ThetaL +
+                helper(K2c, W2c, H2c, Z2c) * cosThetaK2 * cos2ThetaL +
+                helper(K3, W3, H3, Z3) * sinThetaK2 * sinThetaL2 * cos(2 * phi) +
+                helper(K4, W4, H4, Z4) * sin2ThetaK * sin2ThetaL * cos(phi) +
+                helper(W5, K5, H5, Z5) * sin2ThetaK * sinThetaL * cos(phi) +
+                helper(W6s, K6s, H6s, Z6s) * sinThetaK2 * cosThetaL +
+                helper(K7, W7, H7, Z7) * sin2ThetaK * sinThetaL * sin(phi) +
+                helper(W8, K8, H8, Z8) * sin2ThetaK * sin2ThetaL * sin(phi) +
+                helper(W9, K9, H9, Z9) * sinThetaK2 * sinThetaL2 * sin(2 * phi)
+        );
+    }
 
 public:
     inline double evaluate() const override {
@@ -326,8 +358,6 @@ public:
         return 0;
     }
 };
-
-void runFit(int nEvents, int nToys, bool masslessApproximation, bool normalizeBothPdfs=false);
 
 
 #endif //CERN_INDIVIDUALTIMEDEPENDENT_H

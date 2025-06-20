@@ -25,7 +25,9 @@ add_executable(cern src/main.cpp
         include/individualTimeDependent.h
         include/parameterValues.h
         src/plotting.cpp
-        include/plotting.h)
+        include/plotting.h
+        src/run.cpp
+        include/run.h)
 
 target_link_libraries(cern ${ROOT_LIBRARIES})
 
