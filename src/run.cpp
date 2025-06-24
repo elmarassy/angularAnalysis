@@ -18,7 +18,7 @@
 
 using namespace RooFit;
 
-void runFit(int nEvents, int nToys, bool masslessApproximation, bool normalizeBothPdfs) {
+void runFit(const char* directory, double B0proportion, int nEvents, int nToys, bool masslessApproximation) {
 
     std::unique_ptr<RooAbsReal> K1s;
     std::unique_ptr<RooAbsReal> K2s;
@@ -94,13 +94,13 @@ void runFit(int nEvents, int nToys, bool masslessApproximation, bool normalizeBo
         H2s = std::make_unique<RooFormulaVar>("H2s", "H1s/3", RooArgSet(*H1s));
         H2c = std::make_unique<RooFormulaVar>("H2c", "-H1c", RooArgSet(*H1c));
 
-        if (normalizeBothPdfs) {
-            Z1s = std::make_unique<RooFormulaVar>("Z1s", "(3.0/16.0) * ((16.0*W1s/3.0 + 4*W1c)/x - 4*Z1c)", RooArgSet(*W1s, *W1c, *Z1c, *x));
-            Z2s = std::make_unique<RooFormulaVar>("Z2s", "(1.0/16.0) * ((16.0*W1s/3.0 + 4*W1c)/x - 4*Z1c)", RooArgSet(*W1s, *W1c, *Z1c, *x));
-        } else {
-            Z1s = makeParam("Z1s");
-            Z2s = std::make_unique<RooFormulaVar>("Z2s", "Z1s/3", RooArgSet(*Z1s));
-        }
+//        if (normalizeBothPdfs) {
+//            Z1s = std::make_unique<RooFormulaVar>("Z1s", "(3.0/16.0) * ((16.0*W1s/3.0 + 4*W1c)/x - 4*Z1c)", RooArgSet(*W1s, *W1c, *Z1c, *x));
+//            Z2s = std::make_unique<RooFormulaVar>("Z2s", "(1.0/16.0) * ((16.0*W1s/3.0 + 4*W1c)/x - 4*Z1c)", RooArgSet(*W1s, *W1c, *Z1c, *x));
+//        } else {
+        Z1s = makeParam("Z1s");
+        Z2s = std::make_unique<RooFormulaVar>("Z2s", "Z1s/3", RooArgSet(*Z1s));
+//        }
         Z2c = std::make_unique<RooFormulaVar>("Z2c", "-Z1c", RooArgSet(*Z1c));
     } else {
         K2c = makeParam("K2c");
@@ -164,14 +164,15 @@ void runFit(int nEvents, int nToys, bool masslessApproximation, bool normalizeBo
 //    plot(cosThetaK, bBarFitData, result, *bBar.createProjection(RooArgSet(cosThetaL, phi, t)), "timeDependent/fits/B0bar/cosThetaK.png");
 //    plot(phi, bBarFitData, result, *bBar.createProjection(RooArgSet(cosThetaL, cosThetaK, t)), "timeDependent/fits/B0bar/phi.png");
 //    plot(t, bBarFitData, result, *bBar.createProjection(RooArgSet(cosThetaL, cosThetaK, phi)), "timeDependent/fits/B0bar/t.png");
-
-    runPulls("timeDependent/testing.root", &simPdf, type, observables, testValues, false, nToys, nEvents);
+    const char* title = Form("%s/run_%d_%.3f_%d_%d.root", directory, masslessApproximation, B0proportion, nEvents, nToys);
+    std::cout << "Started running; saving to file " << title << std::endl;
+    runPulls(title, &simPdf, type, observables, testValues, false, B0proportion, nToys, nEvents);
 //    plotPulls("testing.root", pulls, masslessApproximation);
 }
 
 
 void runPulls(const char* saveFile, RooSimultaneous* pdf, RooCategory type, const RooArgSet& observables,
-              const std::map<std::string, double>& trueValues, bool useAsymmetricError, int nToys = 100, int nEvents = 500) {
+              const std::map<std::string, double>& trueValues, bool useAsymmetricError, double B0proportion=0.5, int nToys = 100, int nEvents = 500) {
 
     auto outFile = TFile::Open(saveFile, "RECREATE");
     gStyle->SetOptStat(0);
@@ -192,9 +193,9 @@ void runPulls(const char* saveFile, RooSimultaneous* pdf, RooCategory type, cons
 
     auto fullObservables = dynamic_cast<RooArgSet*>(observables.Clone());
     fullObservables->add(type);
-    double proportion = pdf->getPdf("B0")->createIntegral(observables)->getVal();
-    std::cout << "Generating data with B0 proportion = " << proportion << std::endl;
-    int bEvents = int(nEvents * proportion);
+//    double proportion = pdf->getPdf("B0")->createIntegral(observables)->getVal();
+    std::cout << "Generating data with B0 proportion = " << B0proportion << std::endl;
+    int bEvents = int(nEvents * B0proportion);
     for (int i = 0; i < nToys; i++) {
 
         std::unique_ptr<RooDataSet> bData{pdf->getPdf("B0")->generate(observables, bEvents)};
@@ -211,7 +212,7 @@ void runPulls(const char* saveFile, RooSimultaneous* pdf, RooCategory type, cons
             continue;
         }
         std::map<std::string, std::pair<double, double>> currentPullResults;
-        const double saveValue = 5;
+        const double saveValue = 3;
         bool saveProjections = false;
 
         for (auto& p : trueValues) {
@@ -240,6 +241,7 @@ void runPulls(const char* saveFile, RooSimultaneous* pdf, RooCategory type, cons
             }
         }
         if (saveProjections) {
+            std::cout << "Large pull value in toy #" << i << ", saving projections" << std::endl;
             auto dir = projectionDir->mkdir(Form("Toy #%d", i));
             makePullProjections(currentPullResults, &*fitResult, *pdf, &toy, dir, i);
         }

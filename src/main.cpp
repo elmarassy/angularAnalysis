@@ -435,6 +435,6 @@ int main() {
     RooMsgService::instance().setStreamStatus(0, false);
     RooMsgService::instance().setGlobalKillBelow(RooFit::FATAL);
 
-    runFit(4000, 300, true, false);
+    runFit("timeDependent", 1, 4000, 100, true);
     return 0;
 }
